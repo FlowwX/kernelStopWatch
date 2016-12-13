@@ -6,15 +6,14 @@ module="timer"
 # remove old module
 /sbin/rmmod ./$module.ko $* || true
 
+#clean
 make clean
 
+#compile
 make all
 
 # load new module
 /sbin/insmod ./$module.ko $* || exit 1
 
-echo "================================="
-echo
-cat /dev/timerf
-echo
-echo
+# change permissions
+chmod 666 /dev/timer?
