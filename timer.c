@@ -138,7 +138,9 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
    if(send==1) 
          return 0;
 
+   PDEBUG("Read from Device");
    int length = current_device->read(buffer);
+
 
     send=1;
     return length;
@@ -166,7 +168,7 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
 
    current_device->write();
 
-   PDEBUG("TIMER: Received (%s) from the user! (%c:%d)\n", copy, cmd_char, cmd_value);
+   PDEBUG("Received (%s) from user! (%c:%d)\n", copy, cmd_char, cmd_value);
 
    memset(buffer, 0x00, sizeof(buffer));   /* clear buffer */;
    return len;
@@ -178,7 +180,7 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
  *  @param filep A pointer to a file object (defined in linux/fs.h)
  */
 static int dev_release(struct inode *inodep, struct file *filep){
-   PDEBUG("TIMER: Device successfully closed\n");
+   PDEBUG("Device successfully closed\n");
    return 0;
 }
 
@@ -225,6 +227,7 @@ on_ready_timerf(){
          PDEBUG("start timer");
       break;
       default:
+         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char);
       break;
    }
 };
@@ -235,9 +238,10 @@ on_ready_timerr(){
       case LOAD_TIMER:
          current_device->loaded_value = cmd_value;
          current_device->state = LOAD;
-         PDEBUG(KERN_INFO "TIMER: load timer\n");
+         PDEBUG(KERN_INFO "load timer\n");
       break;
       default:
+         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char)
       break;
    }
 };
@@ -250,16 +254,17 @@ on_pause(void){
          current_device->pause_jiffies += get_jiffies_64() - jiffies_pause_start;
          jiffies_pause_start=0;
          current_device->state = RUN;
-         PDEBUG(KERN_INFO "TIMER: continue timer\n");
+         PDEBUG(KERN_INFO "continue timer\n");
       break;
       case RESET_TIMER:
          current_device->start_jiffies = 0;
          current_device->state = RDY;
          current_device->pause_jiffies = 0;
          jiffies_pause_start = 0;
-         PDEBUG(KERN_INFO "TIMER: reset timer\n");
+         PDEBUG(KERN_INFO "reset timer\n");
       break;
       default:
+         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char)
       break;
    }
 };
@@ -270,16 +275,17 @@ on_run(void){
       case PAUSE_TIMER:
          jiffies_pause_start = get_jiffies_64();
          current_device->state = PAUSE;
-         PDEBUG(KERN_INFO "TIMER: pause timer\n");
+         PDEBUG(KERN_INFO "pause timer\n");
       break;
       case RESET_TIMER:
          current_device->start_jiffies = 0;
          current_device->state = RDY;
          current_device->pause_jiffies = 0;
          jiffies_pause_start = 0;
-         PDEBUG(KERN_INFO "TIMER: reset timer\n");
+         PDEBUG(KERN_INFO "reset timer\n");
       break;
       default:
+         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char)
       break;
    }
 };
@@ -290,16 +296,17 @@ on_load(void){
       case START_TIMER:
          current_device->start_jiffies = get_jiffies_64();
          current_device->state = RUN;
-         PDEBUG(KERN_INFO "TIMER: start timer\n");
+         PDEBUG(KERN_INFO "start timer\n");
       break;
       case RESET_TIMER:
          current_device->start_jiffies = 0;
          current_device->state = RDY;
          current_device->pause_jiffies = 0;
          jiffies_pause_start = 0;
-         PDEBUG(KERN_INFO "TIMER: reset timer\n");
+         PDEBUG(KERN_INFO "reset timer\n");
       break;
       default:
+         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char)
       break;
    }
 };
