@@ -241,7 +241,7 @@ on_ready_timerr(){
          PDEBUG(KERN_INFO "load timer\n");
       break;
       default:
-         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char)
+         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char);
       break;
    }
 };
@@ -264,7 +264,7 @@ on_pause(void){
          PDEBUG(KERN_INFO "reset timer\n");
       break;
       default:
-         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char)
+         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char);
       break;
    }
 };
@@ -285,7 +285,7 @@ on_run(void){
          PDEBUG(KERN_INFO "reset timer\n");
       break;
       default:
-         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char)
+         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char);
       break;
    }
 };
@@ -306,7 +306,7 @@ on_load(void){
          PDEBUG(KERN_INFO "reset timer\n");
       break;
       default:
-         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char)
+         PDEBUG("Eingabe (%c) nicht erlaubt", cmd_char);
       break;
    }
 };
