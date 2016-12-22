@@ -112,10 +112,10 @@ static void __exit timer_exit(void){
  *  @param filep A pointer to a file object (defined in linux/fs.h)
  */
 static int dev_open(struct inode *inodep, struct file *filep){
+   int i;
    send=0;
 
    //map current device
-   int i;
    for(i=0; i<NUM_MACHINES; i++){
       if(inodep->i_rdev==machines[i].id){
          current_device = &machines[i];
@@ -135,11 +135,13 @@ static int dev_open(struct inode *inodep, struct file *filep){
  *  @param offset The offset if required
  */
 static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *offset){
+   int length;
+
    if(send==1) 
          return 0;
 
    PDEBUG("Read from Device");
-   int length = current_device->read(buffer);
+   length = current_device->read(buffer);
 
 
     send=1;
@@ -155,6 +157,7 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
  *  @param offset The offset if required
  */
 static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, loff_t *offset){
+   int success;
 
    //clean input
    char * copy = kmalloc(strlen(buffer) + 1, GFP_KERNEL); 
@@ -163,14 +166,14 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
 
    cmd_char = copy[0];
 
-   int success = sscanf(copy+1, "%lu", &cmd_value);
+   success = sscanf(copy+1, "%lu", &cmd_value);
 
 
    current_device->write();
 
-   PDEBUG("Received (%s) from user! (%c:%d)\n", copy, cmd_char, cmd_value);
+   PDEBUG("Received (%s) from user! (%c:%lu)\n", copy, cmd_char, cmd_value);
 
-   memset(buffer, 0x00, sizeof(buffer));   /* clear buffer */;
+   memset((void*)buffer, 0x00, sizeof(buffer));   /* clear buffer */;
    return len;
 }
 
@@ -311,7 +314,7 @@ on_load(void){
    }
 };
 
-char* get_state(int state){
+const char* get_state(int state){
    switch(state){
       case RDY:
          return ready_state;
@@ -331,7 +334,8 @@ char* get_state(int state){
 
 int
 read_timerf(const char *buffer){
-   char message[255];
+   int error_count;
+   char message[MESSAGE_LENGTH];
    int counter = 0;
    int pause = current_device->pause_jiffies;
 
@@ -346,13 +350,17 @@ read_timerf(const char *buffer){
    sprintf(message, "Zustand: \t\t%s\nCounter in s: \t\t%d\ndavon Pausen in s: \t%d\nGesamt in s: \t\t%d\n", 
       get_state(current_device->state), jiffies_to_seconds(counter), jiffies_to_seconds(pause), jiffies_to_seconds(counter-pause) ); 
    
-   int error_count = copy_to_user(buffer, message, strlen(message));
+   error_count = copy_to_user((void*)buffer, message, strlen(message));
+   if(error_count==-1){
+      return 0;
+   }
    return strlen(message);
 }
 
 int
 read_timerr(const char *buffer){
-   char message[255];
+   int error_count;
+   char message[MESSAGE_LENGTH];
    int amount;
    int counter = 0;
    int pause = current_device->pause_jiffies;
@@ -369,7 +377,10 @@ read_timerr(const char *buffer){
    sprintf(message, "Zustand: \t\t%s\nCounter in s: \t\t%d\ndavon Pausen in s: \t%d\nGesamt in s: \t\t%d\n", 
       get_state(current_device->state), jiffies_to_seconds(counter), jiffies_to_seconds(pause), (amount<0)?0:amount ); 
    
-   int error_count = copy_to_user(buffer, message, strlen(message));
+   error_count = copy_to_user((void*)buffer, message, strlen(message));
+   if(error_count==-1){
+      return 0;
+   }
    return strlen(message);
 }
 

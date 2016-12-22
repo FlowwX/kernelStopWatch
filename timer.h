@@ -17,6 +17,8 @@
 #define  DEVICE_NAME_2 "timerr"    ///< The device will appear at /dev/timerr using this value
 #define  CLASS_NAME  "timer"        ///< The device class -- this is a character device driver
 
+#define MESSAGE_LENGTH 255
+
 //State Strings
 static const char ready_state[]  = "READY"; 
 static const char run_state[]    = "RUNNING"; 
@@ -70,8 +72,6 @@ struct state_machine{
 //vars
 static int    majorNumber;                  ///< Stores the device number -- determined automatically
 static int    minorNumber = 0; 
-static char   message[256];           ///< Memory for the string that is passed from userspace
-static short  size_of_message;              ///< Used to remember the size of the string stored
 static struct class*  timerClass  = NULL; ///< The device-driver class struct pointer
 static struct device* timerDevice = NULL; ///< The device-driver device struct pointer
 
